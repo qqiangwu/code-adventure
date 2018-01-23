@@ -23,19 +23,24 @@ namespace {
     }
 }
 
-Async_logger::Async_logger(const std::string& file_sink, const std::chrono::milliseconds duration)
-    : out_(std::fopen(file_sink.c_str(), "a")),
+Async_logger::Async_logger(const std::string& file_sink,
+        const std::chrono::milliseconds duration,
+        const int buffer_size)
+    : buffer_size_(buffer_size),
+      out_(std::fopen(file_sink.c_str(), "a")),
       flush_interval_(duration),
       stopped_(false)
 {
+    assert(buffer_size > 0 && "buffer size should be larger than zero");
+
     if (!out_) {
         throw std::system_error(error_code(errno, system_category()));
     }
 
     for (int i = 0; i < buffer_count; ++i) {
-        auto buffer = new std::string{};
-        buffer->reserve(max_line_size);
-        frontend_buffers_.push_back(buffer);
+        auto buffer = std::make_unique<std::string>();
+        buffer->reserve(buffer_size_);
+        frontend_buffers_.push_back(buffer.release());
     }
 
     worker_ = thread([this]{ this->do_work_(); });
@@ -45,6 +50,7 @@ Async_logger::~Async_logger() noexcept
 {
     if (worker_.joinable()) {
         stopped_ = true;
+        backend_usable_.notify_one();
         worker_.join();
     }
 
@@ -61,7 +67,7 @@ Async_logger::~Async_logger() noexcept
 
 void Async_logger::append(const std::string& line) noexcept
 {
-    assert(line.size() <= max_line_size && "line too long");
+    assert(line.size() <= buffer_size_ && "line too long");
 
     std::unique_lock<std::mutex> lock(mutex_);
 
@@ -81,7 +87,7 @@ void Async_logger::append(const std::string& line) noexcept
     }
 }
 
-bool Async_logger::can_write_(const std::string& line) noexcept
+bool Async_logger::can_write_(const std::string& line) const noexcept
 {
     if (frontend_buffers_.size() > 2) {
         return true;
@@ -115,7 +121,7 @@ Async_logger::Buffer_ptr Async_logger::poll_writable_buffer_() noexcept
 {
     std::unique_lock<std::mutex> lock(mutex_);
 
-    while (backend_buffers_.empty()) {
+    while (!stopped_ && backend_buffers_.empty()) {
         backend_usable_.wait_for(lock, flush_interval_);
 
         if (!frontend_buffers_.empty() && !frontend_buffers_.front()->empty()) {
@@ -123,11 +129,9 @@ Async_logger::Buffer_ptr Async_logger::poll_writable_buffer_() noexcept
         }
     }
 
-    auto frontend_non_empty = !frontend_buffers_.empty() && !frontend_buffers_.front()->empty();
     auto buffer = !backend_buffers_.empty()
                   ? pop_front(backend_buffers_)
-                  : (frontend_non_empty? pop_front(frontend_buffers_): nullptr);
-    assert(buffer && "poll buffer get null");
+                  : pop_front(frontend_buffers_);
 
     return buffer;
 }

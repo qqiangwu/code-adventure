@@ -1,7 +1,7 @@
 //
 // Created by wuqq on 23/01/2018.
 //
-
+#include <cstdio>
 #include <string>
 #include "async_logger.h"
 
@@ -12,6 +12,8 @@ using namespace Logging;
 
 void benchmark(const std::string& file_sink, const int n)
 {
+    std::remove(file_sink.c_str());
+
     const auto line = "Hello 0123456789 abcdefghijklmnopqrstuvwxyz"s;
     const int bytes = n * line.size();
     const auto from = std::chrono::system_clock::now();
