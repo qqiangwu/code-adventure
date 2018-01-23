@@ -30,8 +30,8 @@ void benchmark(const int n, const int buffer_size)
 
     const auto seconds = duration_cast<milliseconds>(system_clock::now() - from).count() / 1000.f;
 
-    printf("%12s: %f seconds, %d bytes, %10.2f msg/s, %.2f MiB/s\n",
-            file_sink.c_str(), seconds, bytes, n / seconds, bytes / seconds / (1024 * 1024));
+    printf("%d-KB: %f seconds, %d bytes, %10.2f msg/s, %.2f MiB/s\n",
+            buffer_size / 1024, seconds, bytes, n / seconds, bytes / seconds / (1024 * 1024));
 }
 
 int main(const int argc, const char* argv[])
@@ -42,7 +42,7 @@ int main(const int argc, const char* argv[])
     }
 
     const auto min_buffer_size = 4 * 1024;
-    const auto max_buffer_size = 4 * 1024 * 1024;
+    const auto max_buffer_size = 64 * 1024 * 1024;
 
     for (auto i = min_buffer_size; i <= max_buffer_size; i = i << 1) {
         benchmark(n, i);

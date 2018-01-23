@@ -92,7 +92,7 @@ bool Async_logger::can_write_(const std::string& line) const noexcept
     if (frontend_buffers_.size() > 2) {
         return true;
     } else if (frontend_buffers_.size() == 1) {
-        auto& buffer = frontend_buffers_.front();
+        const auto& buffer = frontend_buffers_.front();
 
         return buffer->size() + line.size() <= buffer->max_size();
     } else {
