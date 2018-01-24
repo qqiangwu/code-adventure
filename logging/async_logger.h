@@ -17,9 +17,6 @@
 #include <boost/circular_buffer.hpp>
 
 namespace Logging {
-    /**
-     * TODO 问题：如何选择Buffer的大小？
-     */
     class Async_logger : private boost::noncopyable {
     public:
         static constexpr int buffer_count = 8;
