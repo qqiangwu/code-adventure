@@ -37,6 +37,8 @@ Async_logger::Async_logger(const std::string& file_sink,
         throw std::system_error(error_code(errno, system_category()));
     }
 
+    std::setbuf(out_, nullptr);
+
     for (int i = 0; i < buffer_count; ++i) {
         auto buffer = std::make_unique<std::string>();
         buffer->reserve(buffer_size_);
