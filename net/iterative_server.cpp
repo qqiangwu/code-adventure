@@ -7,7 +7,7 @@ try {
     using namespace Net;
 
     std::vector<char> buffer(1024);
-    Acceptor acceptor { { Ip::any(), 8000  }  };
+    Acceptor acceptor { Ipv4_addr(Ip::any(), 8000) };
 
     for (;;) {
         auto client = acceptor.accept();

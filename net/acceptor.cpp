@@ -13,12 +13,19 @@ Acceptor::Acceptor(Ipv4_addr addr)
         throw_system_error();
     }
 
+    int enable_reuse_addr = 1;
+    auto r = ::setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable_reuse_addr, sizeof(enable_reuse_addr));
+    if (r < 0) {
+        ::close(fd_);
+        throw_system_error();
+    }
+
     sockaddr_in server_addr {};
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htonl(addr.ip().value());
     server_addr.sin_port = htons(addr.port());
 
-    auto r = ::bind(fd_, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+    r = ::bind(fd_, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
     if (r < 0) {
         ::close(fd_);
         throw_system_error();
