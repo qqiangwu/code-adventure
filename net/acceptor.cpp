@@ -59,10 +59,17 @@ std::unique_ptr<Socket> Acceptor::accept()
 
         return std::unique_ptr<Socket>(new Socket(fd, addr_, remote_));
     } else {
-        if (fd == EAGAIN || fd == EINTR) {
+        assert(errno != EFAULT);
+        assert(errno != EBADF);
+        assert(errno != EINVAL);
+        assert(errno != ENOTSOCK);
+        assert(errno != EOPNOTSUPP);
+
+        if (errno == EAGAIN || errno == EINTR) {
             return nullptr;
         }
 
+        // for EMFILE/ENOMEM
         throw_system_error();
 
         return nullptr;

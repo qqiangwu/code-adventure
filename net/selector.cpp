@@ -113,10 +113,10 @@ bool Selector::do_select_(std::chrono::milliseconds timeout) noexcept
             &readable_fds_,
             &writeable_fds_,
             nullptr,
-            &timeout_);
+            timeout == timeout.max()? nullptr: &timeout_);
 
-    if (ret < 0 && errno == EBADF) {
-        std::terminate();
+    if (ret < 0) {
+        assert(errno != EBADF && "Invalid fd detected");
     }
 
     return ret > 0;

@@ -16,7 +16,7 @@ bool is_running = true;
 std::vector<char> buffer(4096);
 Selector selector;
 
-bool handle_accpet(Observer_ptr<Acceptor> acceptor) noexcept;
+bool handle_accept(Observer_ptr<Acceptor> acceptor) noexcept;
 bool handle_input(Observer_ptr<Socket> socket) noexcept;
 
 int main(const int argc, const char** argv)
@@ -31,7 +31,7 @@ int main(const int argc, const char** argv)
     Acceptor acceptor(Ipv4_addr(Ip::any(), 8000));
     acceptor.set_nonblocking(true);
 
-    selector.add_acceptor(&acceptor, &handle_accpet);
+    selector.add_acceptor(&acceptor, &handle_accept);
 
     std::cout << "Echo server started\n";
 
@@ -42,7 +42,7 @@ int main(const int argc, const char** argv)
     return 0;
 }
 
-bool handle_accpet(Observer_ptr<Acceptor> acceptor) noexcept
+bool handle_accept(Observer_ptr<Acceptor> acceptor) noexcept
 try {
     while (auto conn = acceptor->accept()) {
         // don't set blocking
