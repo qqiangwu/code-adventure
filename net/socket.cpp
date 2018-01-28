@@ -18,8 +18,14 @@ int Socket::read(std::vector<char>& buffer) noexcept
 
         if (rc == 0) {
             break;
-        } else if (rc < 0 && errno != EINTR) {
-            break;
+        } else if (rc < 0) {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+
+            if (errno != EINTR) {
+                break;
+            }
         }
 
         bytes_read += rc;
@@ -40,8 +46,14 @@ int Socket::write(const std::vector<char>& buffer) noexcept
 
         if (rc == 0) {
             break;
-        } else if (rc < 0 && errno != EINTR) {
-            break;
+        } else if (rc < 0) {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+
+            if (errno != EINTR) {
+                break;
+            }
         }
 
         bytes_written += rc;

@@ -15,6 +15,10 @@ namespace {
         const auto fd = ::socket(AF_INET, SOCK_STREAM, 0);
 
         if (fd < 0) {
+            assert(errno != EPROTOTYPE);
+            assert(errno != EPROTONOSUPPORT);
+            assert(errno != EAFNOSUPPORT);
+
             throw_system_error();
         }
 
@@ -28,6 +32,12 @@ Acceptor::Acceptor(const Ipv4_addr addr)
     int enable_reuse_addr = 1;
     auto r = ::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR, &enable_reuse_addr, sizeof(enable_reuse_addr));
     if (r < 0) {
+        assert(errno != EBADF);
+        assert(errno != EFAULT);
+        assert(errno != EINVAL);
+        assert(errno != ENOPROTOOPT);
+        assert(errno != ENOTSOCK);
+
         throw_system_error();
     }
 
@@ -38,11 +48,24 @@ Acceptor::Acceptor(const Ipv4_addr addr)
 
     r = ::bind(handle(), reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
     if (r < 0) {
+        assert(errno != EAFNOSUPPORT);
+        assert(errno != EBADF);
+        assert(errno != EDESTADDRREQ);
+        assert(errno != EFAULT);
+        assert(errno != ENOTSOCK);
+        assert(errno != EOPNOTSUPP);
+
         throw_system_error();
     }
 
     r = ::listen(handle(), 1024);
     if (r < 0) {
+        assert(errno != EBADF);
+        assert(errno != EDESTADDRREQ);
+        assert(errno != EINVAL);
+        assert(errno != ENOTSOCK);
+        assert(errno != EOPNOTSUPP);
+
         throw_system_error();
     }
 }

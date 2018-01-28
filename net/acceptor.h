@@ -22,6 +22,8 @@ namespace Net {
         /**
          * @return nullptr if no socket is accepted.
          * @throws std::system_error if io error occurs
+         *
+         * basic guarantee
          */
         std::unique_ptr<Socket> accept();
 

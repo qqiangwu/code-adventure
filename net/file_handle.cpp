@@ -4,7 +4,6 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <cassert>
 #include "error_util.h"
 #include "file_handle.h"
 
@@ -27,6 +26,9 @@ void File_handle::set_nonblocking(const bool nonblocking)
 
     const int flags = ::fcntl(fd_, F_GETFL, 0);
     if (flags == -1) {
+        assert(errno != EBADF);
+        assert(errno != EINVAL);
+
         throw_system_error();
     }
 
@@ -35,6 +37,9 @@ void File_handle::set_nonblocking(const bool nonblocking)
                           (flags ^ O_NONBLOCK);
     const auto r = ::fcntl(fd_, F_SETFL, newflags);
     if (r == -1) {
+        assert(errno != EBADF);
+        assert(errno != EINVAL);
+
         throw_system_error();
     }
 

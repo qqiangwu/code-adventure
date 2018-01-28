@@ -116,7 +116,8 @@ bool Selector::do_select_(std::chrono::milliseconds timeout) noexcept
             timeout == timeout.max()? nullptr: &timeout_);
 
     if (ret < 0) {
-        assert(errno != EBADF && "Invalid fd detected");
+        assert(errno != EBADF);
+        assert(errno != EINVAL);
     }
 
     return ret > 0;
