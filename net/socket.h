@@ -3,23 +3,16 @@
 
 #include <cassert>
 #include <vector>
+#include <deque>
+#include "common_fwd.h"
 #include "addr.h"
+#include "file_handle.h"
 
 namespace Net {
-    class Connector;
-    class Acceptor;
-    class Selector;
-
-    class Socket {
-    public:
-        ~Socket();
-
-        Socket(const Socket&) = delete;
-        Socket(Socket&&) = delete;
-
-        Socket& operator=(const Socket&) = delete;
-        Socket& operator=(Socket&&) = delete;
-
+    /**
+     * not thread safe
+     */
+    class Socket : public Detail::File_handle {
     public:
         Ipv4_addr local_addr() const noexcept
         {
@@ -33,12 +26,18 @@ namespace Net {
 
     public:
         /**
-         * \return as the same as syscall
+         * read as many as possible unless -1
+         *
+         * @return as the same as syscall
+         *
          */
         int read(std::vector<char>& buffer) noexcept;
 
         /**
-         * \return as the same as syscall
+         * write as many as possible unless -1
+         *
+         * @return as the same as syscall
+         *
          */
         int write(const std::vector<char>& buffer) noexcept;
 
@@ -49,15 +48,13 @@ namespace Net {
 
     private:
         /**
-         * \pre fd is valid
+         * @pre fd is valid
          */
         Socket(int fd, Ipv4_addr local, Ipv4_addr remote)
-            : fd_(fd), local_(local), remote_(remote)
+            : File_handle(fd), local_(local), remote_(remote)
         {
-            assert(fd >= 0);
         }
 
-        int fd_;
         Ipv4_addr local_;
         Ipv4_addr remote_;
     };

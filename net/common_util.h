@@ -11,4 +11,7 @@ protected:
     ~Noncopyable() = default;
 };
 
+template <class T>
+using Observer_ptr = T*;
+
 #endif

@@ -21,7 +21,7 @@ namespace Net {
 
     public:
         /**
-         * \throws std::invalid_argument if string is not valid
+         * @throws std::invalid_argument if string is not valid
          */
         static Ip from_string(const std::string& ip);
 

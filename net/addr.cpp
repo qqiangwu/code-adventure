@@ -19,7 +19,7 @@ std::string Ip::str() const
     std::uint8_t a = ip;
 
     std::ostringstream oss;
-    oss << a << "." << b << "." << c << "." << d;
+    oss << int(a) << "." << int(b) << "." << int(c) << "." << int(d);
 
     return oss.str();
 }
