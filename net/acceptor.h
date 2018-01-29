@@ -24,9 +24,8 @@ namespace Net {
     public:
         /**
          * @return nullptr if no socket is accepted.
-         * @throws std::system_error if cannot allocate resources.
+         * @throws Resource_not_enough
          *
-         * basic guarantee
          */
         std::unique_ptr<Socket> accept();
 
