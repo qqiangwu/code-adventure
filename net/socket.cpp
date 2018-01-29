@@ -6,7 +6,7 @@
 
 using namespace Net;
 
-int Socket::read(std::vector<char>& buffer) noexcept
+int Socket::read(std::vector<char>& buffer)
 {
     int rc = -1;
     int bytes_read = 0;
@@ -51,7 +51,7 @@ int Socket::read(std::vector<char>& buffer) noexcept
     }
 }
 
-int Socket::write(const std::vector<char>& buffer) noexcept
+int Socket::write(const std::vector<char>& buffer)
 {
     int bytes_written = 0;
 
@@ -92,7 +92,7 @@ int Socket::write(const std::vector<char>& buffer) noexcept
     }
 }
 
-int Socket::read_some(std::vector<char>& buffer) noexcept
+int Socket::read_some(std::vector<char>& buffer)
 {
     for (;;) {
         const int rc = ::read(handle(), buffer.data(), buffer.size());
@@ -123,7 +123,7 @@ int Socket::read_some(std::vector<char>& buffer) noexcept
     }
 }
 
-int Socket::write_some(const std::vector<char>& buffer) noexcept
+int Socket::write_some(const std::vector<char>& buffer)
 {
     for (;;) {
         const int rc = ::write(handle(), buffer.data(), buffer.size());

@@ -35,7 +35,7 @@ namespace Net {
          * @throws Resource_not_enough
          *
          */
-        int read(std::vector<char>& buffer) noexcept;
+        int read(std::vector<char>& buffer);
 
         /**
          * read nonblockingly, works in nonblocking mode.
@@ -47,7 +47,7 @@ namespace Net {
          * @throws Resource_not_enough
          *
          */
-        int read_some(std::vector<char>& buffer) noexcept;
+        int read_some(std::vector<char>& buffer);
 
         /**
          *
@@ -61,7 +61,7 @@ namespace Net {
          * @throws Remote_closed
          *
          */
-        int write(const std::vector<char>& buffer) noexcept;
+        int write(const std::vector<char>& buffer);
 
         /**
          * write nonblockingly, works in nonblocking mode.
@@ -75,7 +75,7 @@ namespace Net {
          * @throws Remote_closed
          *
          */
-        int write_some(const std::vector<char>& buffer) noexcept;
+        int write_some(const std::vector<char>& buffer);
 
     private:
         friend class Connector;
