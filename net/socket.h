@@ -42,7 +42,6 @@ namespace Net {
          *
          * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
-         * @throws Operation_timeout
          * @throws Resource_not_enough
          *
          */
