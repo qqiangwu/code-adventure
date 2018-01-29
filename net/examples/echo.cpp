@@ -3,11 +3,8 @@
 //
 
 #include <iostream>
-#include <chrono>
 #include <vector>
-#include <string>
 #include "acceptor.h"
-#include "socket.h"
 #include "selector.h"
 
 using namespace Net;
@@ -21,13 +18,6 @@ bool handle_input(Observer_ptr<Socket> socket) noexcept;
 
 int main(const int argc, const char** argv)
 {
-    if (argc > 1) {
-        const int buffer_size = std::stoi(argv[1]);
-        buffer.resize(buffer_size);
-
-        std::cout << "Set buffer size:" << buffer_size << std::endl;
-    }
-
     Acceptor acceptor(Ipv4_addr(Ip::any(), 8000));
     acceptor.set_nonblocking(true);
 
@@ -65,7 +55,7 @@ bool handle_input(Observer_ptr<Socket> socket) noexcept
     std::fill(buffer.begin(), buffer.end(), 0);
 
     auto alive = false;
-    const auto rc = socket->read(buffer);
+    const auto rc = socket->read_some(buffer);
 
     if (rc > 0) {
         buffer.resize(rc);

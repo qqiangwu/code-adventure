@@ -61,3 +61,42 @@ int Socket::write(const std::vector<char>& buffer) noexcept
 
     return bytes_written > 0? bytes_written: -1;
 }
+
+int Socket::read_some(std::vector<char>& buffer) noexcept
+{
+    for (;;) {
+        const int rc = ::read(handle(), buffer.data(), buffer.size());
+
+        if (rc >= 0) {
+            return rc;
+        } else {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+
+            if (errno != EINTR) {
+                return rc;
+            }
+        }
+
+    }
+}
+
+int Socket::write_some(const std::vector<char>& buffer) noexcept
+{
+    for (;;) {
+        const int rc = ::write(handle(), buffer.data(), buffer.size());
+
+        if (rc >= 0) {
+            return rc;
+        } else {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+
+            if (errno != EINTR) {
+                return rc;
+            }
+        }
+    }
+}

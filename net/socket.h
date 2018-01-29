@@ -34,12 +34,30 @@ namespace Net {
         int read(std::vector<char>& buffer) noexcept;
 
         /**
+         * read nonblockingly, works in nonblocking mode.
+         * in blocking mode, it might block.
+         *
+         * @return as the same as syscall
+         *
+         */
+        int read_some(std::vector<char>& buffer) noexcept;
+
+        /**
          * write as many as possible unless -1
          *
          * @return as the same as syscall
          *
          */
         int write(const std::vector<char>& buffer) noexcept;
+
+        /**
+         * write nonblockingly, works in nonblocking mode.
+         * in blocking mode, it might block.
+         *
+         * @return as the same as syscall
+         *
+         */
+        int write_some(const std::vector<char>& buffer) noexcept;
 
     private:
         friend class Connector;
