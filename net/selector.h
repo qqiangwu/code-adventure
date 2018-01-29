@@ -15,6 +15,7 @@
 #include "common_fwd.h"
 #include "common_util.h"
 #include "file_handle.h"
+#include "net_error.h"
 
 namespace Net {
     /**
@@ -28,10 +29,14 @@ namespace Net {
      */
     class Selector : private Noncopyable {
     public:
+        static constexpr int max_io_object_supported = FD_SETSIZE;
+
+        int io_object_count() const noexcept;
+
         /**
          * @param acceptor
          * @param handler
-         *
+         * @pre   io_object_count() < max_io_object_supported
          * duplicated adding has no effect
          */
         void add_acceptor(Observer_ptr<Acceptor> acceptor, EventHandler<Acceptor> handler) noexcept;
@@ -41,6 +46,7 @@ namespace Net {
          *
          * @param socket
          * @param handler
+         * @pre   io_object_count() < max_io_object_supported
          */
         void add_readable_socket(Observer_ptr<Socket> socket, EventHandler<Socket> handler) noexcept;
 
@@ -49,6 +55,7 @@ namespace Net {
          *
          * @param socket
          * @param handler
+         * @pre   io_object_count() < max_io_object_supported
          */
         void add_writeable_socket(Observer_ptr<Socket> socket, EventHandler<Socket> handler) noexcept;
 
@@ -82,18 +89,17 @@ namespace Net {
          * @param timeout  0 for immediately, max for blocking
          * @returns true if events occurs
          *
-         * TODO EBADF/EINVAL/EINTR/EAGAIN
+         * @throws Resource_not_enough
          *
-         * EBADF: programming error, std::terminate
          */
-        bool select(std::chrono::milliseconds timeout) noexcept;
+        bool select(std::chrono::milliseconds timeout);
 
     private:
         bool has_registered_events_() const noexcept;
 
         void prepare_fd_() noexcept;
 
-        bool do_select_(std::chrono::milliseconds timeout) noexcept;
+        bool do_select_(std::chrono::milliseconds timeout);
 
         void do_dispatch_() noexcept;
 

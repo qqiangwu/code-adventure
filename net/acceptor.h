@@ -14,14 +14,17 @@ namespace Net {
     class Acceptor : public Detail::File_handle {
     public:
         /**
-         * @throws std::system_error if failed to start acceptor
+         * @throws Net_access_error if no permissions
+         * @throws Address_in_use
+         * @throws Address_not_available
+         * @throws Resource_not_enough
          */
         explicit Acceptor(Ipv4_addr addr);
 
     public:
         /**
          * @return nullptr if no socket is accepted.
-         * @throws std::system_error if io error occurs
+         * @throws std::system_error if cannot allocate resources.
          *
          * basic guarantee
          */

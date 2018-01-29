@@ -26,9 +26,13 @@ namespace Net {
 
     public:
         /**
-         * read as many as possible unless -1
          *
-         * @return as the same as syscall
+         * read until the buffer is full or EOF
+         *
+         * @return number of bytes read(>= 0), -1 for EOF
+         * @throws Connection_reset
+         * @throws Operation_timeout
+         * @throws Resource_not_enough
          *
          */
         int read(std::vector<char>& buffer) noexcept;
@@ -37,15 +41,24 @@ namespace Net {
          * read nonblockingly, works in nonblocking mode.
          * in blocking mode, it might block.
          *
-         * @return as the same as syscall
+         * @return number of bytes read(>= 0), -1 for EOF
+         * @throws Connection_reset
+         * @throws Operation_timeout
+         * @throws Resource_not_enough
          *
          */
         int read_some(std::vector<char>& buffer) noexcept;
 
         /**
-         * write as many as possible unless -1
          *
-         * @return as the same as syscall
+         * write until buffer is exhausted or connection is closed
+         *
+         * @return number of bytes written(>= 0)
+         * @throws Connection_reset
+         * @throws Net_down
+         * @throws Net_unreachable
+         * @throws Resource_not_enough
+         * @throws Remote_closed
          *
          */
         int write(const std::vector<char>& buffer) noexcept;
@@ -54,7 +67,12 @@ namespace Net {
          * write nonblockingly, works in nonblocking mode.
          * in blocking mode, it might block.
          *
-         * @return as the same as syscall
+         * @return number of bytes written(>= 0)
+         * @throws Connection_reset
+         * @throws Net_down
+         * @throws Net_unreachable
+         * @throws Resource_not_enough
+         * @throws Remote_closed
          *
          */
         int write_some(const std::vector<char>& buffer) noexcept;

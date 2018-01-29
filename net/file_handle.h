@@ -42,13 +42,9 @@ namespace Net {
             }
 
             /**
-             *
              * @param nonblocking
-             * @throws std::system_error if io errors.
-             *
-             * basic guarantee
              */
-            void set_nonblocking(const bool nonblocking);
+            void set_nonblocking(const bool nonblocking) noexcept;
 
         protected:
             explicit File_handle(Native_handle_type fd) noexcept

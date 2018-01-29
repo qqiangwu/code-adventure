@@ -4,7 +4,6 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include "error_util.h"
 #include "file_handle.h"
 
 using namespace Net::Detail;
@@ -18,30 +17,20 @@ File_handle::~File_handle() noexcept
     fd_ = invalid_file_handle;
 }
 
-void File_handle::set_nonblocking(const bool nonblocking)
+void File_handle::set_nonblocking(const bool nonblocking) noexcept
 {
     if (nonblocking_ == nonblocking) {
         return;
     }
 
     const int flags = ::fcntl(fd_, F_GETFL, 0);
-    if (flags == -1) {
-        assert(errno != EBADF);
-        assert(errno != EINVAL);
-
-        throw_system_error();
-    }
+    assert(flags >= 0);
 
     const auto newflags = nonblocking?
                           (flags | O_NONBLOCK):
                           (flags ^ O_NONBLOCK);
     const auto r = ::fcntl(fd_, F_SETFL, newflags);
-    if (r == -1) {
-        assert(errno != EBADF);
-        assert(errno != EINVAL);
-
-        throw_system_error();
-    }
+    assert(r >= 0);
 
     nonblocking_ = nonblocking;
 }

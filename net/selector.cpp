@@ -3,9 +3,9 @@
 //
 
 #include <cerrno>
+#include <algorithm>
 #include "selector.h"
 #include "acceptor.h"
-#include "socket.h"
 
 using namespace Net;
 
@@ -24,6 +24,11 @@ namespace {
 
         return time;
     }
+}
+
+int Selector::io_object_count() const noexcept
+{
+    return std::max(acceptors_.size() + readers_.size(), writers_.size());
 }
 
 void Selector::add_acceptor(Observer_ptr<Acceptor> acceptor, EventHandler<Acceptor> handler) noexcept
@@ -59,7 +64,7 @@ void Selector::remove_writable_socket(Observer_ptr<Socket> socket) noexcept
     FD_CLR(socket->handle(), &writeable_fds_);
 }
 
-bool Selector::select(std::chrono::milliseconds timeout) noexcept
+bool Selector::select(std::chrono::milliseconds timeout)
 {
     if (!has_registered_events_()) {
         return false;
@@ -105,7 +110,7 @@ void Selector::prepare_fd_() noexcept
     }
 }
 
-bool Selector::do_select_(std::chrono::milliseconds timeout) noexcept
+bool Selector::do_select_(std::chrono::milliseconds timeout)
 {
     timeval timeout_ = to_timeval(timeout);
 
@@ -118,6 +123,10 @@ bool Selector::do_select_(std::chrono::milliseconds timeout) noexcept
     if (ret < 0) {
         assert(errno != EBADF);
         assert(errno != EINVAL);
+
+        if (errno != EAGAIN) {
+            throw_net_error<Resource_not_enough>();
+        }
     }
 
     return ret > 0;

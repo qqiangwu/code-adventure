@@ -2,7 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include "acceptor.h"
-#include "error_util.h"
+#include "net_error.h"
 
 using namespace Net;
 
@@ -19,7 +19,11 @@ namespace {
             assert(errno != EPROTONOSUPPORT);
             assert(errno != EAFNOSUPPORT);
 
-            throw_system_error();
+            if (errno == EACCES) {
+                throw_net_error<Net_access_error>();
+            } else {
+                throw_net_error<Resource_not_enough>();
+            }
         }
 
         return fd;
@@ -37,8 +41,9 @@ Acceptor::Acceptor(const Ipv4_addr addr)
         assert(errno != EINVAL);
         assert(errno != ENOPROTOOPT);
         assert(errno != ENOTSOCK);
+        assert(errno != EISCONN);
 
-        throw_system_error();
+        throw_net_error<Resource_not_enough>();
     }
 
     sockaddr_in server_addr {};
@@ -55,7 +60,14 @@ Acceptor::Acceptor(const Ipv4_addr addr)
         assert(errno != ENOTSOCK);
         assert(errno != EOPNOTSUPP);
 
-        throw_system_error();
+        switch (errno) {
+        case EACCES: throw_net_error<Net_access_error>();
+        case EADDRINUSE: throw_net_error<Address_in_use>(addr);
+        case EADDRNOTAVAIL: throw_net_error<Address_not_available>(addr);
+        default:
+            assert(false && "invalid errno");
+            break;
+        }
     }
 
     r = ::listen(handle(), 1024);
@@ -66,7 +78,7 @@ Acceptor::Acceptor(const Ipv4_addr addr)
         assert(errno != ENOTSOCK);
         assert(errno != EOPNOTSUPP);
 
-        throw_system_error();
+        throw_net_error<Net_access_error>();
     }
 }
 
@@ -87,13 +99,14 @@ std::unique_ptr<Socket> Acceptor::accept()
         assert(errno != EINVAL);
         assert(errno != ENOTSOCK);
         assert(errno != EOPNOTSUPP);
+        assert(errno != ECONNABORTED);
 
         if (errno == EAGAIN || errno == EINTR) {
             return nullptr;
         }
 
         // for EMFILE/ENOMEM
-        throw_system_error();
+        throw_net_error<Resource_not_enough>();
 
         return nullptr;
     }

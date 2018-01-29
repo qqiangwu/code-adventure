@@ -2,19 +2,20 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "socket.h"
-#include "error_util.h"
+#include "net_error.h"
 
 using namespace Net;
 
 int Socket::read(std::vector<char>& buffer) noexcept
 {
+    int rc = -1;
     int bytes_read = 0;
 
     while (bytes_read < buffer.size()) {
         char* start = buffer.data() + bytes_read;
         const int remaining = buffer.size() - bytes_read;
 
-        const auto rc = ::read(handle(), start, remaining);
+        rc = ::read(handle(), start, remaining);
 
         if (rc == 0) {
             break;
@@ -31,7 +32,23 @@ int Socket::read(std::vector<char>& buffer) noexcept
         bytes_read += rc;
     }
 
-    return bytes_read > 0? bytes_read: -1;
+    if (bytes_read > 0) {
+        return bytes_read;
+    } else if (rc == 0) {
+        return -1;
+    } else {
+        switch (errno) {
+        case EAGAIN: return 0;
+        case ECONNRESET: throw_net_error<Connection_reset>();
+        case ETIMEDOUT: throw_net_error<Operation_timeout>();
+        case ENOBUFS: case ENOMEM:
+            throw_net_error<Resource_not_enough>();
+
+        default:
+            assert(false && "bad errno in read");
+            break;
+        }
+    }
 }
 
 int Socket::write(const std::vector<char>& buffer) noexcept
@@ -42,11 +59,9 @@ int Socket::write(const std::vector<char>& buffer) noexcept
         const char* start = buffer.data() + bytes_written;
         const int remaining = buffer.size() - bytes_written;
 
-        const auto rc = ::write(handle(), start, remaining);
+        const int rc = ::write(handle(), start, remaining);
 
-        if (rc == 0) {
-            break;
-        } else if (rc < 0) {
+        if (rc < 0) {
             assert(errno != EBADF);
             assert(errno != EFAULT);
             assert(errno != EINVAL);
@@ -59,7 +74,22 @@ int Socket::write(const std::vector<char>& buffer) noexcept
         bytes_written += rc;
     }
 
-    return bytes_written > 0? bytes_written: -1;
+    if (bytes_written > 0) {
+        return bytes_written;
+    } else {
+        switch (errno) {
+        case EAGAIN: return 0;
+        case ECONNRESET: throw_net_error<Connection_reset>();
+        case ETIMEDOUT: throw_net_error<Operation_timeout>();
+        case ENETDOWN: throw_net_error<Net_down>();
+        case ENETUNREACH: throw_net_error<Net_unreachable>(remote_addr());
+        case ENOTSOCK: throw_net_error<Resource_not_enough>();
+
+        default:
+            assert(false && "bad errno in write");
+            break;
+        }
+    }
 }
 
 int Socket::read_some(std::vector<char>& buffer) noexcept
@@ -75,7 +105,18 @@ int Socket::read_some(std::vector<char>& buffer) noexcept
             assert(errno != EINVAL);
 
             if (errno != EINTR) {
-                return rc;
+                switch (errno) {
+                case EAGAIN: return 0;
+                case ECONNRESET: throw_net_error<Connection_reset>();
+                case ETIMEDOUT: throw_net_error<Operation_timeout>();
+                case ENOBUFS: case ENOMEM:
+                    throw_net_error<Resource_not_enough>();
+                case EPIPE: throw_net_error<Remote_closed>();
+
+                default:
+                    assert(false && "bad errno in read_some");
+                    break;
+                }
             }
         }
 
@@ -95,7 +136,19 @@ int Socket::write_some(const std::vector<char>& buffer) noexcept
             assert(errno != EINVAL);
 
             if (errno != EINTR) {
-                return rc;
+                switch (errno) {
+                case EAGAIN: return 0;
+                case ECONNRESET: throw_net_error<Connection_reset>();
+                case ETIMEDOUT: throw_net_error<Operation_timeout>();
+                case ENETDOWN: throw_net_error<Net_down>();
+                case ENETUNREACH: throw_net_error<Net_unreachable>(remote_addr());
+                case ENOTSOCK: throw_net_error<Resource_not_enough>();
+                case EPIPE: throw_net_error<Remote_closed>();
+
+                default:
+                    assert(false && "bad errno in write_some");
+                    break;
+                }
             }
         }
     }
