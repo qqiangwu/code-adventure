@@ -17,7 +17,7 @@ namespace Net {
             return ip_;
         }
 
-        std::string str() const;
+        std::string str() const noexcept;
 
     public:
         /**
@@ -50,7 +50,7 @@ namespace Net {
             return port_;
         }
 
-        std::string str() const
+        std::string str() const noexcept
         {
             return ip_.str() + ":" + std::to_string(port_);
         }

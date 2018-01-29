@@ -6,7 +6,7 @@
 
 using namespace Net;
 
-std::string Ip::str() const
+std::string Ip::str() const noexcept
 {
     const auto uint16_max = std::numeric_limits<std::uint16_t>::max();
     std::uint32_t ip = value();
