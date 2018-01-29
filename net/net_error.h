@@ -61,11 +61,6 @@ namespace Net {
         using Net_error::Net_error;
     };
 
-    class Operation_timeout : public Net_error {
-    public:
-        using Net_error::Net_error;
-    };
-
     class Net_down : public Net_error {
     public:
         using Net_error::Net_error;

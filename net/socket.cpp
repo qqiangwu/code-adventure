@@ -39,8 +39,8 @@ int Socket::read(std::vector<char>& buffer)
     } else {
         switch (errno) {
         case EAGAIN: return 0;
+        case ETIMEDOUT: return -2;
         case ECONNRESET: throw_net_error<Connection_reset>();
-        case ETIMEDOUT: throw_net_error<Operation_timeout>();
         case ENOBUFS: case ENOMEM:
             throw_net_error<Resource_not_enough>();
 
@@ -79,8 +79,8 @@ int Socket::write(const std::vector<char>& buffer)
     } else {
         switch (errno) {
         case EAGAIN: return 0;
+        case ETIMEDOUT: return -2;
         case ECONNRESET: throw_net_error<Connection_reset>();
-        case ETIMEDOUT: throw_net_error<Operation_timeout>();
         case ENETDOWN: throw_net_error<Net_down>();
         case ENETUNREACH: throw_net_error<Net_unreachable>(remote_addr());
         case ENOTSOCK: throw_net_error<Resource_not_enough>();
@@ -107,8 +107,8 @@ int Socket::read_some(std::vector<char>& buffer)
             if (errno != EINTR) {
                 switch (errno) {
                 case EAGAIN: return 0;
+                case ETIMEDOUT: return -2;
                 case ECONNRESET: throw_net_error<Connection_reset>();
-                case ETIMEDOUT: throw_net_error<Operation_timeout>();
                 case ENOBUFS: case ENOMEM:
                     throw_net_error<Resource_not_enough>();
                 case EPIPE: throw_net_error<Remote_closed>();
@@ -138,8 +138,8 @@ int Socket::write_some(const std::vector<char>& buffer)
             if (errno != EINTR) {
                 switch (errno) {
                 case EAGAIN: return 0;
+                case ETIMEDOUT: return -2;
                 case ECONNRESET: throw_net_error<Connection_reset>();
-                case ETIMEDOUT: throw_net_error<Operation_timeout>();
                 case ENETDOWN: throw_net_error<Net_down>();
                 case ENETUNREACH: throw_net_error<Net_unreachable>(remote_addr());
                 case ENOTSOCK: throw_net_error<Resource_not_enough>();

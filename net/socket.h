@@ -29,9 +29,8 @@ namespace Net {
          *
          * read until the buffer is full or EOF
          *
-         * @return number of bytes read(>= 0), -1 for EOF
+         * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
-         * @throws Operation_timeout
          * @throws Resource_not_enough
          *
          */
@@ -41,7 +40,7 @@ namespace Net {
          * read nonblockingly, works in nonblocking mode.
          * in blocking mode, it might block.
          *
-         * @return number of bytes read(>= 0), -1 for EOF
+         * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
          * @throws Operation_timeout
          * @throws Resource_not_enough
@@ -53,7 +52,7 @@ namespace Net {
          *
          * write until buffer is exhausted or connection is closed
          *
-         * @return number of bytes written(>= 0)
+         * @return number of bytes written(>= 0), -2 for timeout
          * @throws Connection_reset
          * @throws Net_down
          * @throws Net_unreachable
@@ -64,10 +63,10 @@ namespace Net {
         int write(const std::vector<char>& buffer);
 
         /**
-         * write nonblockingly, works in nonblocking mode.
+         * write nonblockingly, works in nonblocking mode
          * in blocking mode, it might block.
          *
-         * @return number of bytes written(>= 0)
+         * @return number of bytes written(>= 0), -2 for timeout
          * @throws Connection_reset
          * @throws Net_down
          * @throws Net_unreachable
