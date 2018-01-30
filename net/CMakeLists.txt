@@ -10,9 +10,3 @@ set(LIB_SRC
 
 add_library(net STATIC ${LIB_SRC})
 target_include_directories(net PUBLIC .)
-
-add_executable(net_iterative_server examples/iterative_server.cpp)
-target_link_libraries(net_iterative_server PRIVATE net)
-
-add_executable(net_echo examples/echo.cpp)
-target_link_libraries(net_echo PRIVATE net)

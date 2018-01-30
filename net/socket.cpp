@@ -97,8 +97,10 @@ int Socket::read_some(std::vector<char>& buffer)
     for (;;) {
         const int rc = ::read(handle(), buffer.data(), buffer.size());
 
-        if (rc >= 0) {
+        if (rc > 0) {
             return rc;
+        } else if (rc == 0) {
+            return -1;
         } else {
             assert(errno != EBADF);
             assert(errno != EFAULT);

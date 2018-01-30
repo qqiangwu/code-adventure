@@ -7,3 +7,4 @@ find_package(Boost REQUIRED)
 
 add_subdirectory(logging)
 add_subdirectory(net)
+add_subdirectory(examples)
