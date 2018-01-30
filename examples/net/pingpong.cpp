@@ -39,7 +39,7 @@ public:
 private:
     bool on_accept_(Observer_ptr<Acceptor> acceptor) noexcept
     try {
-        while (auto socket = acceptor->accept()) {
+        while (auto socket = acceptor->try_accept()) {
             add_connection(std::move(socket));
         }
 

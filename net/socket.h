@@ -30,6 +30,7 @@ namespace Net {
          * read until the buffer is full or EOF
          *
          * @pre    is_nonblocking() == false
+         * @pre    !buffer.empty()
          * @return number of bytes read(> 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
          * @throws Resource_not_enough
@@ -38,21 +39,35 @@ namespace Net {
         int read(std::vector<char>& buffer);
 
         /**
-         * read nonblockingly, works in nonblocking mode.
-         * in blocking mode, it might block.
+         * read all available data. will block if no data.
          *
-         * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
+         * @pre    is_nonblocking() == false
+         * @pre    !buffer.empty()
+         * @return number of bytes read(> 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
          * @throws Resource_not_enough
          *
          */
         int read_some(std::vector<char>& buffer);
+        
+        /**
+         * read nonblockingly, works in nonblocking mode.
+         *
+         * @pre    is_nonblocking() == true
+         * @pre    !buffer.empty()
+         * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
+         * @throws Connection_reset
+         * @throws Resource_not_enough
+         *
+         */
+        int try_read(std::vector<char>& buffer);
 
         /**
          *
          * write until buffer is exhausted or connection is closed
          *
          * @pre    is_nonblocking() == false
+         * @pre    !buffer.empty()
          * @return number of bytes written(> 0), -2 for timeout
          * @throws Connection_reset
          * @throws Net_down
@@ -64,10 +79,11 @@ namespace Net {
         int write(const std::vector<char>& buffer);
 
         /**
-         * write nonblockingly, works in nonblocking mode
-         * in blocking mode, it might block.
+         * write as possible. if kernel buffer is full, block.
          *
-         * @return number of bytes written(>= 0), -2 for timeout
+         * @pre    is_nonblocking() == false
+         * @pre    !buffer.empty()
+         * @return number of bytes written(> 0), -2 for timeout
          * @throws Connection_reset
          * @throws Net_down
          * @throws Net_unreachable
@@ -76,6 +92,22 @@ namespace Net {
          *
          */
         int write_some(const std::vector<char>& buffer);
+        
+        /**
+         * write nonblockingly, works in nonblocking mode
+         * in blocking mode, it might block.
+         *
+         * @pre    is_nonblocking() == true
+         * @pre    !buffer.empty()
+         * @return number of bytes written(>= 0), -2 for timeout
+         * @throws Connection_reset
+         * @throws Net_down
+         * @throws Net_unreachable
+         * @throws Resource_not_enough
+         * @throws Remote_closed
+         *
+         */
+        int try_write(const std::vector<char>& buffer);
 
     private:
         friend class Connector;

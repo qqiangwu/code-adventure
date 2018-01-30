@@ -34,7 +34,7 @@ int main(const int argc, const char** argv)
 
 bool handle_accept(Observer_ptr<Acceptor> acceptor) noexcept
 try {
-    while (auto conn = acceptor->accept()) {
+    while (auto conn = acceptor->try_accept()) {
         // don't set blocking
         std::shared_ptr<Socket> shared_conn(std::move(conn));
         selector.add_readable_socket(shared_conn.get(), [shared_conn](auto socket){

@@ -16,7 +16,7 @@ try {
             std::cout << "recv from: " << client->remote_addr().str();
 
             buffer.resize(buffer.capacity());
-            const auto r = client->read(buffer);
+            const auto r = client->read_some(buffer);
             if (r > 0) {
                 buffer.resize(r);
                 client->write(buffer);

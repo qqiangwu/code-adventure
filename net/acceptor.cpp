@@ -84,30 +84,52 @@ Acceptor::Acceptor(const Ipv4_addr addr)
 
 std::unique_ptr<Socket> Acceptor::accept()
 {
+    assert(!is_nonblocking());
+
+    for (;;) {
+        if (auto p = native_accept_()) {
+            return p;
+        }
+    }
+}
+
+std::unique_ptr<Socket> Acceptor::try_accept()
+{
+    assert(is_nonblocking());
+
+    return native_accept_();
+}
+
+std::unique_ptr<Socket> Acceptor::native_accept_()
+{
     sockaddr_in remote {};
     socklen_t len = sizeof(remote);
 
-    const int fd = ::accept(handle(), reinterpret_cast<sockaddr*>(&remote), &len);
-    if (fd >= 0) {
-        Ip ip(ntohl(remote.sin_addr.s_addr));
-        Ipv4_addr remote_(ip, ntohs(remote.sin_port));
+    for (;;) {
+        const int fd = ::accept(handle(), reinterpret_cast<sockaddr*>(&remote), &len);
+        if (fd >= 0) {
+            Ip ip(ntohl(remote.sin_addr.s_addr));
+            Ipv4_addr remote_(ip, ntohs(remote.sin_port));
 
-        return std::unique_ptr<Socket>(new Socket(fd, addr_, remote_));
-    } else {
-        assert(errno != EFAULT);
-        assert(errno != EBADF);
-        assert(errno != EINVAL);
-        assert(errno != ENOTSOCK);
-        assert(errno != EOPNOTSUPP);
-        assert(errno != ECONNABORTED);
+            return std::unique_ptr<Socket>(new Socket(fd, addr_, remote_));
+        } else {
+            assert(errno != EFAULT);
+            assert(errno != EBADF);
+            assert(errno != EINVAL);
+            assert(errno != ENOTSOCK);
+            assert(errno != EOPNOTSUPP);
+            assert(errno != ECONNABORTED);
 
-        if (errno == EAGAIN || errno == EINTR) {
+            if (errno == EAGAIN) {
+                return nullptr;
+            } else if (errno == EINTR) {
+                continue;
+            }
+
+            // for EMFILE/ENOMEM
+            throw_net_error<Resource_not_enough>();
+
             return nullptr;
         }
-
-        // for EMFILE/ENOMEM
-        throw_net_error<Resource_not_enough>();
-
-        return nullptr;
     }
 }

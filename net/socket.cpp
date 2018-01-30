@@ -9,6 +9,7 @@ using namespace Net;
 int Socket::read(std::vector<char>& buffer)
 {
     assert(!is_nonblocking());
+    assert(!buffer.empty());
 
     int rc = -1;
     int bytes_read = 0;
@@ -56,6 +57,7 @@ int Socket::read(std::vector<char>& buffer)
 int Socket::write(const std::vector<char>& buffer)
 {
     assert(!is_nonblocking());
+    assert(!buffer.empty());
 
     int bytes_written = 0;
 
@@ -98,6 +100,81 @@ int Socket::write(const std::vector<char>& buffer)
 
 int Socket::read_some(std::vector<char>& buffer)
 {
+    assert(!is_nonblocking());
+    assert(!buffer.empty());
+
+    for (;;) {
+        const int rc = ::read(handle(), buffer.data(), buffer.size());
+
+        if (rc > 0) {
+            return rc;
+        } else if (rc == 0) {
+            return -1;
+        } else {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+            assert(errno != EAGAIN);
+
+            if (errno != EINTR) {
+                switch (errno) {
+                case ETIMEDOUT: return -2;
+                case ECONNRESET: throw_net_error<Connection_reset>();
+                case ENOBUFS: case ENOMEM:
+                    throw_net_error<Resource_not_enough>();
+                case EPIPE: throw_net_error<Remote_closed>();
+
+                default:
+                    assert(false && "bad errno in try_read");
+                    break;
+                }
+            }
+        }
+
+    }
+}
+
+int Socket::write_some(const std::vector<char>& buffer)
+{
+    assert(!is_nonblocking());
+    assert(!buffer.empty());
+
+    for (;;) {
+        const int rc = ::write(handle(), buffer.data(), buffer.size());
+
+        assert(rc != 0);
+        
+        if (rc > 0) {
+            return rc;
+        } else {
+            assert(errno != EBADF);
+            assert(errno != EFAULT);
+            assert(errno != EINVAL);
+            assert(errno != EAGAIN);
+
+            if (errno != EINTR) {
+                switch (errno) {
+                case ETIMEDOUT: return -2;
+                case ECONNRESET: throw_net_error<Connection_reset>();
+                case ENETDOWN: throw_net_error<Net_down>();
+                case ENETUNREACH: throw_net_error<Net_unreachable>(remote_addr());
+                case ENOTSOCK: throw_net_error<Resource_not_enough>();
+                case EPIPE: throw_net_error<Remote_closed>();
+
+                default:
+                    assert(false && "bad errno in try_write");
+                    break;
+                }
+            }
+        }
+    }
+}
+
+int Socket::try_read(std::vector<char>& buffer)
+{
+    assert(is_nonblocking());
+    assert(!buffer.empty());
+
     for (;;) {
         const int rc = ::read(handle(), buffer.data(), buffer.size());
 
@@ -120,7 +197,7 @@ int Socket::read_some(std::vector<char>& buffer)
                 case EPIPE: throw_net_error<Remote_closed>();
 
                 default:
-                    assert(false && "bad errno in read_some");
+                    assert(false && "bad errno in try_read");
                     break;
                 }
             }
@@ -129,8 +206,11 @@ int Socket::read_some(std::vector<char>& buffer)
     }
 }
 
-int Socket::write_some(const std::vector<char>& buffer)
+int Socket::try_write(const std::vector<char>& buffer)
 {
+    assert(is_nonblocking());
+    assert(!buffer.empty());
+
     for (;;) {
         const int rc = ::write(handle(), buffer.data(), buffer.size());
 
@@ -152,7 +232,7 @@ int Socket::write_some(const std::vector<char>& buffer)
                 case EPIPE: throw_net_error<Remote_closed>();
 
                 default:
-                    assert(false && "bad errno in write_some");
+                    assert(false && "bad errno in try_write");
                     break;
                 }
             }

@@ -23,11 +23,27 @@ namespace Net {
 
     public:
         /**
-         * @return nullptr if no socket is accepted.
+         * may block
+         *
+         * @pre    is_nonblocking() == false
+         * @return a valid socket pointer
          * @throws Resource_not_enough
          *
          */
         std::unique_ptr<Socket> accept();
+
+        /**
+         * never block
+         *
+         * @pre    is_nonblocking() == true
+         * @return null if no connection available.
+         * @throws Resource_not_enough
+         *
+         */
+        std::unique_ptr<Socket> try_accept();
+
+    private:
+        std::unique_ptr<Socket> native_accept_();
 
     private:
         const Ipv4_addr addr_;
