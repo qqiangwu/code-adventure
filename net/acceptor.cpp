@@ -86,11 +86,12 @@ std::unique_ptr<Socket> Acceptor::accept()
 {
     assert(!is_nonblocking());
 
-    for (;;) {
-        if (auto p = native_accept_()) {
-            return p;
-        }
-    }
+    auto p = native_accept_();
+
+    // in blocking mode, no EAGAIN, and EINTR is handled already
+    assert(p);
+
+    return p;
 }
 
 std::unique_ptr<Socket> Acceptor::try_accept()
