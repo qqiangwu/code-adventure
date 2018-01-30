@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <string>
 #include <acceptor.h>
 #include <selector.h>
 
@@ -79,8 +80,6 @@ private:
 private:
     void add_connection(std::unique_ptr<Socket> socket) noexcept
     {
-        std::cout << "New connection from: " << socket->remote_addr().str() << std::endl;
-
         selector_.add_readable_socket(socket.get(), [this](auto socket){
             return this->on_read_(socket);
         });
@@ -89,8 +88,6 @@ private:
 
     void remove_connection(Observer_ptr<Socket> socket) noexcept
     {
-        std::cout << "Remove connection from: " << socket->remote_addr().str() << std::endl;
-
         selector_.remove_readable_socket(socket);
 
         auto iter = std::find_if(connections_.begin(), connections_.end(), [socket](auto& e){
@@ -110,9 +107,14 @@ private:
     std::vector<char> buffer_;
 };
 
-int main()
+int main(const int argc, const char** argv)
 {
-    Pingpong pingpong(Ipv4_addr(Ip::any(), 8000));
+    int port = 8000;
+    if (argc > 2) {
+        port = std::stoi(argv[2]);
+    }
+
+    Pingpong pingpong(Ipv4_addr(Ip::any(), port));
 
     pingpong.run();
 }

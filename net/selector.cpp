@@ -124,7 +124,7 @@ bool Selector::do_select_(std::chrono::milliseconds timeout)
         assert(errno != EBADF);
         assert(errno != EINVAL);
 
-        if (errno != EAGAIN) {
+        if (errno != EINTR) {
             throw_net_error<Resource_not_enough>();
         }
     }
