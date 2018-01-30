@@ -30,7 +30,7 @@ namespace Net {
          * read until the buffer is full or EOF
          *
          * @pre    is_nonblocking() == false
-         * @return number of bytes read(>= 0), -1 for EOF, -2 for timeout
+         * @return number of bytes read(> 0), -1 for EOF, -2 for timeout
          * @throws Connection_reset
          * @throws Resource_not_enough
          *
@@ -53,7 +53,7 @@ namespace Net {
          * write until buffer is exhausted or connection is closed
          *
          * @pre    is_nonblocking() == false
-         * @return number of bytes written(>= 0), -2 for timeout
+         * @return number of bytes written(> 0), -2 for timeout
          * @throws Connection_reset
          * @throws Net_down
          * @throws Net_unreachable
