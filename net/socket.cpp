@@ -8,6 +8,8 @@ using namespace Net;
 
 int Socket::read(std::vector<char>& buffer)
 {
+    assert(!is_nonblocking());
+
     int rc = -1;
     int bytes_read = 0;
 
@@ -53,6 +55,8 @@ int Socket::read(std::vector<char>& buffer)
 
 int Socket::write(const std::vector<char>& buffer)
 {
+    assert(!is_nonblocking());
+
     int bytes_written = 0;
 
     while (bytes_written < buffer.size()) {
